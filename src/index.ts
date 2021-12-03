@@ -1,8 +1,5 @@
 // 環境変数、未設定なら例外処理
-if (
-  !process.env.ANNICT_TOKEN ||
-  process.env.ANNICT_TOKEN.length <= 0
-)
+if (!process.env.ANNICT_TOKEN || process.env.ANNICT_TOKEN.length <= 0)
   throw new Error("ANNICT_TOKEN が設定されていません");
 if (
   !process.env.DISCORD_WEBHOOK_URL ||
@@ -153,7 +150,9 @@ class Program implements IProgram {
             },
             {
               name: "放送開始時間",
-              value: moment(new Date(this.started_at)).format('YYYY/MM/DD HH:mm'),
+              value: moment(new Date(this.started_at)).format(
+                "YYYY/MM/DD HH:mm"
+              ),
               inline: false,
             },
             {
@@ -235,21 +234,18 @@ const isToday = (date: Date) => {
  * @returns
  */
 const getPrograms = async () => {
-  const target = new URL(`${annictApiEndpoint}/me/programs`)
-  target.searchParams.set("filter_unwatched", "true") // 未視聴の放送予定だけを取得
-  target.searchParams.set("sort_started_at", "desc")
-  target.searchParams.set("filter_started_at_lt", getTodayDateAsString())
-  target.searchParams.set("per_page", "50")
+  const target = new URL(`${annictApiEndpoint}/me/programs`);
+  target.searchParams.set("filter_unwatched", "true"); // 未視聴の放送予定だけを取得
+  target.searchParams.set("sort_started_at", "desc");
+  target.searchParams.set("filter_started_at_lt", getTodayDateAsString());
+  target.searchParams.set("per_page", "50");
 
-  return await got<ProgramsResponseObject | null>(
-    target.href,
-    {
-      responseType: "json",
-      headers: {
-        Authorization: `Bearer ${annictToken}`,
-      },
-    }
-  ).json<ProgramsResponseObject | null>();
+  return await got<ProgramsResponseObject | null>(target.href, {
+    responseType: "json",
+    headers: {
+      Authorization: `Bearer ${annictToken}`,
+    },
+  }).json<ProgramsResponseObject | null>();
 };
 
 // 放送予定を取得し、通知する
