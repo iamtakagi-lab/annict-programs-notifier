@@ -5,7 +5,7 @@ Cron で定期的に呼び出してください。
 
 ![](https://i.imgur.com/XjZKQpI.png)
 
-## Build with Docker
+## Build & Run with Docker
 `docker-compose up -d --build`
 
 ## LICENCE
