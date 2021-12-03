@@ -5,7 +5,7 @@
 
 Cron で定期的に呼び出してください。
 
-`docker-compose up -d --build`
+Build: `docker-compose up -d --build`
 
 ![](https://i.imgur.com/gP7GjNe.png)
 
