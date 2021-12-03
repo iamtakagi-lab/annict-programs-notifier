@@ -5,6 +5,7 @@
   "author": "iamtakagi",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^16.11.11",
     "@types/webpack": "^5.28.0",
     "cross-env": "^7.0.3",
     "ts-loader": "^9.2.3",
