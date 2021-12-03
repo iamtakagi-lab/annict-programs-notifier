@@ -136,6 +136,7 @@ class Program implements IProgram {
   async notify() {
     return await notifier.send({
       username: this.work.title,
+      avatarURL: this.work.images.recommended_url,
       embeds: [
         new MessageEmbed()
           .setTitle(
