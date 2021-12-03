@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    environment:
+      - NODE_ENV=production
+      - TZ=Asia/Tokyo
+      - ANNICT_TOKEN=xxx
+      - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/123/xxx
