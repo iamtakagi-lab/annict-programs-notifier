@@ -2,9 +2,14 @@
   "name": "annict-programs-notifier",
   "version": "1.0.0",
   "main": "dist/main.js",
+  "scripts": {
+    "build": "yarn cross-env NODE_ENV=production webpack --mode production",
+    "start": "NODE_ENV=production node dist/main.js"
+  },
   "author": "iamtakagi",
   "license": "MIT",
   "devDependencies": {
+    "@types/cron": "^1.7.3",
     "@types/node": "^16.11.11",
     "@types/webpack": "^5.28.0",
     "cross-env": "^7.0.3",
@@ -16,6 +21,7 @@
     "webpack-cli": "^4.5.0"
   },
   "dependencies": {
+    "cron": "^1.8.2",
     "discord.js": "^13.3.1",
     "got": "^11.8.3",
     "moment": "^2.29.1"

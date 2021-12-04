@@ -1,15 +1,17 @@
 // 環境変数、未設定なら例外処理
 if (!process.env.ANNICT_TOKEN || process.env.ANNICT_TOKEN.length <= 0)
   throw new Error("ANNICT_TOKEN が設定されていません");
-if (
-  !process.env.DISCORD_WEBHOOK_URL ||
-  process.env.DISCORD_WEBHOOK_URL.length <= 0
-)
+
+if (!process.env.DISCORD_WEBHOOK_URL || process.env.DISCORD_WEBHOOK_URL.length <= 0)
   throw new Error("DISCORD_WEBHOOK_URL が設定されていません");
+
+if (!process.env.CRON || process.env.CRON.length <= 0)
+  throw new Error("CRON が設定されていません");
 
 // 念のため、タイムゾーン設定
 process.env.TZ = "Asia/Tokyo";
 
+import { CronJob } from "cron";
 import { MessageEmbed, WebhookClient } from "discord.js";
 import got from "got";
 import moment from "moment";
@@ -89,6 +91,10 @@ interface IProgram {
   work: Work;
   episode: Episode;
 }
+
+const cron = process.env.CRON
+
+const tz = process.env.TZ
 
 // Annict Endpoint
 const annictApiEndpoint = "https://api.annict.com/v1" as const;
@@ -211,10 +217,7 @@ interface ProgramsResponseObject {
  * 今日の日付を文字列で返します
  * @returns string
  */
-const getTodayDateAsString = () => {
-  const date = new Date();
-  return `${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`;
-};
+const getTodayDateAsString = () => moment().format("YYYY-MM-DD")
 
 /**
  * 指定された日付が今日かを返します
@@ -249,8 +252,11 @@ const getPrograms = async () => {
   }).json<ProgramsResponseObject | null>();
 };
 
-// 放送予定を取得し、通知する
-getPrograms().then((res) => {
+
+/**
+ * 放送予定を取得し、通知する
+ */
+const execute = () => getPrograms().then((res) => {
   if (!res || !res.programs || res.programs.length <= 0) return;
 
   // レスポンス ログ
@@ -278,3 +284,18 @@ getPrograms().then((res) => {
       }
     });
 });
+
+// Run
+new CronJob(
+  cron,
+  () => {
+    try {
+      execute()
+    } catch (e) {
+      console.error(e);
+    }
+  },
+  null,
+  false,
+  tz
+).start()
