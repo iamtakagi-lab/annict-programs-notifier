@@ -2,7 +2,10 @@
 if (!process.env.ANNICT_TOKEN || process.env.ANNICT_TOKEN.length <= 0)
   throw new Error("ANNICT_TOKEN が設定されていません");
 
-if (!process.env.DISCORD_WEBHOOK_URL || process.env.DISCORD_WEBHOOK_URL.length <= 0)
+if (
+  !process.env.DISCORD_WEBHOOK_URL ||
+  process.env.DISCORD_WEBHOOK_URL.length <= 0
+)
   throw new Error("DISCORD_WEBHOOK_URL が設定されていません");
 
 if (!process.env.CRON || process.env.CRON.length <= 0)
@@ -92,9 +95,9 @@ interface IProgram {
   episode: Episode;
 }
 
-const cron = process.env.CRON
+const cron = process.env.CRON;
 
-const tz = process.env.TZ
+const tz = process.env.TZ;
 
 // Annict Endpoint
 const annictApiEndpoint = "https://api.annict.com/v1" as const;
@@ -217,7 +220,7 @@ interface ProgramsResponseObject {
  * 今日の日付を文字列で返します
  * @returns string
  */
-const getTodayDateAsString = () => moment().format("YYYY-MM-DD")
+const getTodayDateAsString = () => moment().format("YYYY-MM-DD");
 
 /**
  * 指定された日付が今日かを返します
@@ -239,7 +242,7 @@ const isToday = (date: Date) => {
  */
 const getPrograms = async () => {
   const target = new URL(`${annictApiEndpoint}/me/programs`);
-  target.searchParams.set("filter_unwatched", "true"); // 未視聴の放送予定だけを取得
+  target.searchParams.set("filter_unwatched", "false"); //視聴済みのアニメも取得
   target.searchParams.set("sort_started_at", "desc");
   target.searchParams.set("filter_started_at_lt", getTodayDateAsString());
   target.searchParams.set("per_page", "50");
@@ -252,45 +255,48 @@ const getPrograms = async () => {
   }).json<ProgramsResponseObject | null>();
 };
 
-
 /**
  * 放送予定を取得し、通知する
  */
-const execute = () => getPrograms().then((res) => {
-  if (!res || !res.programs || res.programs.length <= 0) return;
+const execute = () =>
+  getPrograms().then((res) => {
+    if (!res || !res.programs || res.programs.length <= 0) return;
 
-  // レスポンス ログ
-  console.info(res);
-
-  // 今日の放送予定をフィルターして通知
-  res.programs
-    .filter(
-      (program) =>
-        program.episode &&
-        program.started_at &&
-        isToday(new Date(program.started_at))
-    )
-    .map(async (program, i) => {
-      // エピソード情報が存在する場合のみ通知
-      if (program.episode) {
-        await new Program(
-          program.id,
-          program.started_at,
-          program.is_rebroadcast,
-          program.channel,
-          program.work,
-          program.episode
-        ).notify();
-      }
-    });
-});
+    // 今日の放送予定をフィルターして通知
+    res.programs
+      .filter(
+        (program) =>
+          program.episode &&
+          program.started_at &&
+          isToday(new Date(program.started_at))
+        // 時刻順に並べ替える
+      )
+      .sort((a, b) =>
+        new Date(a.started_at).getTime() > new Date(b.started_at).getTime()
+          ? 1
+          : -1
+      )
+      .map(async (program, i) => {
+        // エピソード情報が存在する場合のみ通知
+        if (program.episode) {
+          await new Program(
+            program.id,
+            program.started_at,
+            program.is_rebroadcast,
+            program.channel,
+            program.work,
+            program.episode
+          ).notify();
+        }
+      });
+  });
 
 // Run
 new CronJob(
   cron,
   () => {
     try {
-      execute()
+      execute();
     } catch (e) {
       console.error(e);
     }
@@ -298,4 +304,4 @@ new CronJob(
   null,
   false,
   tz
-).start()
+).start();
