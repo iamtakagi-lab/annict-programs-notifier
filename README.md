@@ -1,5 +1,5 @@
 # annict-programs-notifier
-Annict で「見てる」「見たい」を選択している、その日のアニメの放送予定時間を通知します。
+ Annict で「見てる」「見たい」を選択している、その日のアニメの放送予定時間を Discord に通知します。
 
 [チャンネル一覧 | Annict](https://annict.com/channels) にて適宣設定の上で使用してください。
 
